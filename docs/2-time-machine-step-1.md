@@ -52,9 +52,9 @@ Test the app; it should still run as normal.
 
 Change the `updateWithTimeTravel` function so that it checks the model's `paused` flag.
 
-If the flag is true, it should call `rawGame.updateState` with the current `rawModel`, then return a new time machine state with just the `rawModel` updated and everything else the same.
+If the flag is false, it should call `rawGame.updateState` with the current `rawModel`, then return a new time machine state with just the `rawModel` updated and everything else the same.
 
-If the flag is false, update should do nothing; the state of the game remains the same, because it is paused.
+If the flag is true, update should do nothing; the state of the game remains the same, because it is paused.
 
 Ah, but what does “do nothing” mean here? The function has to return _something_. What should it return?
 
