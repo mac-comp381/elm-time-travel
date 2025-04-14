@@ -45,6 +45,7 @@ type alias GameObject =
 type alias Model =
   { ship : GameObject
   , justFiredShot : Bool
+  , shotsFired : Int
   , asteroids : List GameObject
   , bullets : List GameObject
   }
@@ -62,6 +63,7 @@ initialState =
       , shape = shipShape
       }
   , justFiredShot = False
+  , shotsFired = 0
   , asteroids = []
   , bullets = []
   }
@@ -84,6 +86,7 @@ bulletShape =
 
 view computer model =
   [rectangle black computer.screen.width computer.screen.height]
+    ++ [words white ("Shots: " ++ (String.fromInt model.shotsFired)) |> moveY (computer.screen.top - 75)]
     ++ [model.ship      |> viewGameObject shipColor 1.0]
     ++ (model.asteroids |> List.map (viewGameObject asteroidColor 0.7))
     ++ (model.bullets   |> List.map (viewGameObject bulletColor 1.0))
@@ -94,6 +97,7 @@ viewGameObject color opacity obj =
     |> fade opacity
     |> rotate obj.dir
     |> move obj.x obj.y
+
 
 
 ------ UPDATE ------
@@ -112,6 +116,7 @@ shoot computer model =
       { model
         | bullets = model.bullets ++ newBullet model
         , justFiredShot = True
+        , shotsFired = model.shotsFired + 1
       }
   else
     { model | justFiredShot = False }
