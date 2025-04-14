@@ -9,6 +9,7 @@ import Playground exposing (..)
 import Random
 import Set
 
+
 game =
   { initialState = initialState
   , updateState = update
@@ -24,7 +25,7 @@ minAsteroidRadius = 6
 asteroidComplexity = 0.4
 shipSize = 16
 bulletSpeed = 15
-asteroidColor = (rgb 160 160 160)
+asteroidColor = (rgb 190 190 190)
 shipColor = (rgb 255 120 60)
 bulletColor = yellow
 bulletRadius = 2

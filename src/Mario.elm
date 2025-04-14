@@ -32,6 +32,7 @@ initialState =
   , vy = 0
   , dir = Right
   , trace = []
+  , collided = False
   }
 
 type XDirection = Left | Right
@@ -49,6 +50,9 @@ view computer mario =
     [ rectangle (rgb 174 238 238) w h  -- sky
     , rectangle (rgb 74 163 41) w 100  -- ground
         |> moveY b
+    , circle (rgb 250 72 12) 50   -- lava
+            |> moveX 200
+            |> moveY (b + 50)
     , mario.trace
         |> pathToPolygonVertices 1.5
         |> polygon black
@@ -96,27 +100,72 @@ update computer mario =
 
     newX = mario.x + dt * vx
     newY = max 0 (mario.y + dt * vy)
+    collided = ((hypot (mario.x - 200) (mario.y - 0) <= 60))
   in
-    { mario
-      | x = newX
-      , y = newY
-      , vx = vx
-      , vy = (newY - mario.y) / dt
-      , dir =
-          if (toX computer.keyboard) < 0 then
-            Left
-          else if (toX computer.keyboard) > 0 then
-            Right
-          else
-            mario.dir  -- face direction of last movement when standing still
-      , trace = addPointUnlessDuplicate (newX, newY) mario.trace
-    }
+    if collided then
+    {mario | x = 0
+               , y = 0
+               , vx = 0
+               , vy = 0
+               , dir = Right
+               , trace = [] }
+    else
+    {mario | x = newX
+                  , y = newY
+                  , vx = vx
+                 , vy = (newY - mario.y) / dt
+                 , dir =
+                        if (toX computer.keyboard) < 0 then
+                                     Left
+                                   else if (toX computer.keyboard) > 0 then
+                                     Right
+                                   else
+                                     mario.dir  -- face direction of last movement when standing still
+                 , trace = addPointUnlessDuplicate (newX, newY) mario.trace  }
+    --{ mario
+    --  | x =
+    --        if collided then
+    --            0
+    --        else
+    --            newX
+    --  , y =
+    --        if collided then
+    --            0
+    --        else
+    --            newY
+    --  , vx =
+    --      if collided then
+    --         0
+    --     else
+    --         vx
+    --  , vy =
+    --      if collided then
+    --         0
+    --     else
+    --         (newY - mario.y) / dt
+    --  , dir =
+    --      if (toX computer.keyboard) < 0 then
+    --        Left
+    --      else if (toX computer.keyboard) > 0 then
+    --        Right
+    --      else
+    --        mario.dir  -- face direction of last movement when standing still
+    --  , trace =
+    --      if collided then
+    --          []
+    --      else
+    --          addPointUnlessDuplicate (newX, newY) mario.trace
+    --}
 
 addPointUnlessDuplicate point path =
   if (List.head path) == Just point then
     path
   else
     point :: path
+
+--checkLava =
+--  (hypot (x - 50) (y - 150)) <= 20 + 25
+--
 
 -- HELPERS
 
@@ -133,3 +182,6 @@ offsetPath offset points =
 
 pointAdd (x0, y0) (x1, y1) =
   (x0 + x1, y0 + y1)
+
+hypot x y =  -- mysteriously, Elm doesn't have this built in
+  toPolar (x, y) |> Tuple.first
