@@ -32,6 +32,7 @@ initialState =
   , vy = 0
   , dir = Right
   , trace = []
+  , jumps = 0
   }
 
 type XDirection = Left | Right
@@ -57,6 +58,8 @@ view computer mario =
     , marioSpriteName mario
         |> image 70 70
         |> move mario.x (b + 76 + mario.y)
+    , words (rgb 10 10 10) ("JUMP COUNTER: " ++ String.fromInt (mario.jumps))
+        |> moveY (computer.screen.top - 100)
     ]
 
 marioSpriteName mario =
@@ -76,6 +79,7 @@ marioSpriteName mario =
     "https://elm-lang.org/images/mario/" ++ stance ++ "/" ++ direction ++ ".gif"
 
 
+
 -- UPDATE
 
 update computer mario =
@@ -87,15 +91,21 @@ update computer mario =
 
     gravityApplied = mario.vy - dt * gravity
     vy =
-      if mario.y == 0 && computer.keyboard.up then  -- on ground, new jump starts
+      if isStartingJump mario computer then  -- on ground, new jump starts
         jumpPower
       else if computer.keyboard.up then  -- in air, holding jump key for long jump
         gravityApplied
       else
         min jumpCutoff gravityApplied  -- jump key released, limit speed to allow var height jumps
 
-    newX = mario.x + dt * vx
+    newX = hitBounds computer.screen.left computer.screen.right (mario.x + dt * vx)
     newY = max 0 (mario.y + dt * vy)
+
+    newJumps = 
+      if isStartingJump mario computer then
+        mario.jumps + 1
+      else
+        mario.jumps
   in
     { mario
       | x = newX
@@ -110,6 +120,7 @@ update computer mario =
           else
             mario.dir  -- face direction of last movement when standing still
       , trace = addPointUnlessDuplicate (newX, newY) mario.trace
+      , jumps = newJumps
     }
 
 addPointUnlessDuplicate point path =
@@ -133,3 +144,15 @@ offsetPath offset points =
 
 pointAdd (x0, y0) (x1, y1) =
   (x0 + x1, y0 + y1)
+
+hitBounds min max x = -- Don't allow character to move offscreen
+    if max <= min then
+      x
+    else if x > max then
+      max
+    else if x < min then
+      min 
+    else
+      x
+
+isStartingJump mario computer = mario.y == 0 && computer.keyboard.up
