@@ -47,6 +47,8 @@ view computer mario =
     convertY y = (b + 76 + y)
   in
     [ rectangle (rgb 174 238 238) w h  -- sky
+    , circle (rgb 34 48 150) 200 -- planet
+        |> rotate (spin 8 computer.time)
     , rectangle (rgb 74 163 41) w 100  -- ground
         |> moveY b
     , mario.trace
