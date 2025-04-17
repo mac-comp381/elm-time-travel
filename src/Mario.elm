@@ -49,6 +49,9 @@ view computer mario =
     [ rectangle (rgb 174 238 238) w h  -- sky
     , rectangle (rgb 74 163 41) w 100  -- ground
         |> moveY b
+    , rectangle (rgb 255 140 0) 100 60
+        |> moveY (b + 76)
+        |> moveX (w/4)
     , mario.trace
         |> pathToPolygonVertices 1.5
         |> polygon black
@@ -96,9 +99,23 @@ update computer mario =
 
     newX = mario.x + dt * vx
     newY = max 0 (mario.y + dt * vy)
-  in
+
+    fired = 
+          if newX - (computer.screen.width/4) > -50 && newX - (computer.screen.width/4) < 50 && newY < 60 then
+            True -- test to see if Mario is within lava
+          else
+            False 
+  in    
     { mario
-      | x = newX
+      | x = 
+          if newX > (computer.screen.width/2) then
+            (computer.screen.width/2) 
+          else if newX < -(computer.screen.width/2) then
+            -(computer.screen.width/2) 
+          else if fired then
+            0
+          else
+            newX
       , y = newY
       , vx = vx
       , vy = (newY - mario.y) / dt
