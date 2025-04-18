@@ -83,7 +83,11 @@ update computer mario =
     dt = 2
     vx =
       let keyX = (toX computer.keyboard) in
-        if keyX /= 0 then keyX * runSpeed else (mario.vx * coast)
+        if (keyX < 0 && mario.x > -computer.screen.width / 2) || (keyX > 0 && mario.x < computer.screen.width / 2) then
+          if keyX /= 0 then 
+          keyX * runSpeed else (mario.vx * coast)
+        else 
+          0
 
     gravityApplied = mario.vy - dt * gravity
     vy =
