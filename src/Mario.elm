@@ -32,6 +32,7 @@ initialState =
   , vy = 0
   , dir = Right
   , trace = []
+  , jumpLeft = 0
   }
 
 type XDirection = Left | Right
@@ -87,7 +88,7 @@ update computer mario =
 
     gravityApplied = mario.vy - dt * gravity
     vy =
-      if mario.y == 0 && computer.keyboard.up then  -- on ground, new jump starts
+      if (mario.y == 0 || mario.jumpLeft == 1) && computer.keyboard.up then  -- on ground, new jump starts
         jumpPower
       else if computer.keyboard.up then  -- in air, holding jump key for long jump
         gravityApplied
@@ -96,6 +97,17 @@ update computer mario =
 
     newX = mario.x + dt * vx
     newY = max 0 (mario.y + dt * vy)
+    jumpLeft = --Probably overcomplicated double jump state machine
+      if mario.y == 0 then  --On Ground
+        0
+      else if mario.y > 0 && not computer.keyboard.up && mario.jumpLeft == 0 then --In air first jump released
+        1
+      else if mario.y > 0 && computer.keyboard.up && mario.jumpLeft == 1 then --In air second jump pressed
+        2
+      else if mario.y > 0 && not computer.keyboard.up && mario.jumpLeft >= 2 then --In air second jump released
+        3
+      else
+        mario.jumpLeft
   in
     { mario
       | x = newX
@@ -110,6 +122,7 @@ update computer mario =
           else
             mario.dir  -- face direction of last movement when standing still
       , trace = addPointUnlessDuplicate (newX, newY) mario.trace
+      , jumpLeft = jumpLeft
     }
 
 addPointUnlessDuplicate point path =
