@@ -50,7 +50,7 @@ view computer mario =
     , rectangle (rgb 74 163 41) w 100  -- ground
         |> moveY b
     , mario.trace
-        |> pathToPolygonVertices 1.5
+        |> pathToPolygonVertices 4
         |> polygon black
         |> move 0 (b + 76)
         |> fade 0.5
@@ -94,7 +94,7 @@ update computer mario =
       else
         min jumpCutoff gravityApplied  -- jump key released, limit speed to allow var height jumps
 
-    newX = mario.x + dt * vx
+    newX = mario.x + dt * vx |> wrap (computer.screen.left - 70)   (computer.screen.right + 70)
     newY = max 0 (mario.y + dt * vy)
   in
     { mario
@@ -119,6 +119,19 @@ addPointUnlessDuplicate point path =
     point :: path
 
 -- HELPERS
+
+wrap min max x =
+  let
+    diff = max - min
+  in
+    if max <= min then
+      x
+    else if x > max then
+      x - diff
+    else if x < min then
+      x + diff
+    else
+      x
 
 -- Elm’s playground package doesn't have any way to stroke a path.
 -- This function makes a polygon that traces across the given points
