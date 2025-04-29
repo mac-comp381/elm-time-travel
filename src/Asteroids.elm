@@ -153,11 +153,18 @@ applyShipControls computer ship =
   let
     thrust = 0.1 * toY computer.keyboard
     dir = degrees ship.dir
+    prelimDx = ship.dx + thrust * (cos (degrees ship.dir))
+    prelimDy = ship.dy + thrust * (sin (degrees ship.dir))
+    speedCap = 15
   in
     { ship
       | spin = -5 * toX computer.keyboard
-      , dx = ship.dx + thrust * (cos (degrees ship.dir))
-      , dy = ship.dy + thrust * (sin (degrees ship.dir))
+      -- , dx = ship.dx + thrust * (cos (degrees ship.dir))
+      -- , dy = ship.dy + thrust * (sin (degrees ship.dir))
+      , dx = (if prelimDx > speedCap
+        then speedCap else if prelimDx < -1 * speedCap then -1 * speedCap else prelimDx)
+      , dy = (if prelimDy > speedCap
+        then 15 else if prelimDy < -1 * speedCap then -1 * speedCap else prelimDy)
     }
 
 checkBulletCollisions model =
