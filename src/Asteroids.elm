@@ -47,6 +47,7 @@ type alias Model =
   , justFiredShot : Bool
   , asteroids : List GameObject
   , bullets : List GameObject
+  , gameOver : Bool
   }
 
 initialState : Model
@@ -64,6 +65,7 @@ initialState =
   , justFiredShot = False
   , asteroids = []
   , bullets = []
+  , gameOver = False
   }
 
 shipShape =
@@ -80,6 +82,26 @@ bulletShape =
   , (0, -bulletRadius)
   ]
 
+gameOverSize = 800
+
+gameOverShape =
+  [ (-gameOverSize / 2, -gameOverSize / 2)
+  , (gameOverSize / 2,  -gameOverSize / 2)
+  , (gameOverSize / 2,  gameOverSize / 2)
+  , (-gameOverSize / 2, gameOverSize / 2)
+  ]
+
+gameOver = 
+  { x = 0
+  , y = 0
+  , dx = 0
+  , dy = 0
+  , dir = 0
+  , spin = 0
+  , radius = gameOverSize
+  , shape = gameOverShape
+  }
+
 ------ VIEW ------
 
 view computer model =
@@ -87,6 +109,14 @@ view computer model =
     ++ [model.ship      |> viewGameObject shipColor 1.0]
     ++ (model.asteroids |> List.map (viewGameObject asteroidColor 0.7))
     ++ (model.bullets   |> List.map (viewGameObject bulletColor 1.0))
+    ++ drawGameOver model
+
+drawGameOver model =
+  if model.gameOver == True then
+    [ gameOver |> viewGameObject red 1.0
+    , words black "Game over!" |> scale 5 ]
+  else
+    []
 
 viewGameObject : Color -> Float -> GameObject -> Shape
 viewGameObject color opacity obj =
@@ -103,6 +133,7 @@ update computer model =
     |> shoot computer
     |> handleMotion computer
     |> checkBulletCollisions
+    |> checkAsteroidCollisions
 
 shoot computer model =
   if spacePressed computer then
@@ -170,6 +201,17 @@ checkBulletCollisions model =
       , asteroids = freeAsteroids
           ++ splitAsteroids hitAsteroids
     }
+
+checkAsteroidCollisions model =
+  let 
+      (hitAsteroids, freeAsteroids) = findCollided model.asteroids model.asteroids
+      (hitShip, _) = findCollided [model.ship] model.asteroids
+  in
+    if List.isEmpty hitShip then
+      model
+    else
+      { model | gameOver = True }
+    
 
 findCollided shapes otherShapes =
   List.partition (anyCollide otherShapes) shapes
