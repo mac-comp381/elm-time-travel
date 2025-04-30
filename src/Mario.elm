@@ -7,6 +7,7 @@
 module Mario exposing (game)
 
 import Playground exposing (..)
+import TimeTravel exposing (addTimeTravel)
 
 -- PHYSICS PARAMETERS
 
