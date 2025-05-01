@@ -49,6 +49,9 @@ view computer mario =
     [ rectangle (rgb 174 238 238) w h  -- sky
     , rectangle (rgb 74 163 41) w 100  -- ground
         |> moveY b
+    , rectangle (rgb 245 97 11) 100 100 -- lava
+        |> moveY b
+        |> moveX 200
     , mario.trace
         |> pathToPolygonVertices 1.5
         |> polygon black
@@ -98,9 +101,21 @@ update computer mario =
     newY = max 0 (mario.y + dt * vy)
   in
     { mario
-      | x = newX
-      , y = newY
-      , vx = vx
+      | x = 
+          if touchingLava newX newY then
+            0
+          else 
+            newX
+      , y = 
+          if touchingLava newX newY then
+            0
+          else 
+            newY
+      , vx = 
+          if touchingLava newX newY then
+            0
+          else 
+            vx
       , vy = (newY - mario.y) / dt
       , dir =
           if (toX computer.keyboard) < 0 then
@@ -109,7 +124,11 @@ update computer mario =
             Right
           else
             mario.dir  -- face direction of last movement when standing still
-      , trace = addPointUnlessDuplicate (newX, newY) mario.trace
+      , trace = 
+          if touchingLava newX newY then
+            []
+          else 
+            addPointUnlessDuplicate (newX, newY) mario.trace
     }
 
 addPointUnlessDuplicate point path =
@@ -117,6 +136,20 @@ addPointUnlessDuplicate point path =
     path
   else
     point :: path
+
+
+touchingLava x y =
+  if x < 250 then
+    if x > 150 then 
+      if y == 0 then
+        True
+      else
+        False
+    else 
+      False
+  else 
+    False
+
 
 -- HELPERS
 

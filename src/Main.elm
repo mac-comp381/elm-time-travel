@@ -2,6 +2,7 @@ module Main exposing (..)
 
 import Asteroids
 import Mario
+import TimeTravel exposing (addTimeTravel)
 
 import Playground
 
@@ -14,4 +15,5 @@ gameApplication game =
 -- The main entry point for the app
 
 main = Mario.game
+  |> addTimeTravel
   |> gameApplication
