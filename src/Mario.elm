@@ -81,6 +81,7 @@ marioSpriteName mario =
 update computer mario =
   let
     dt = 2
+    w = computer.screen.width  
     vx =
       let keyX = (toX computer.keyboard) in
         if keyX /= 0 then keyX * runSpeed else (mario.vx * coast)
@@ -94,7 +95,8 @@ update computer mario =
       else
         min jumpCutoff gravityApplied  -- jump key released, limit speed to allow var height jumps
 
-    newX = mario.x + dt * vx
+    newX =
+      max (-w / 2) (min (w / 2 ) (mario.x + dt * vx))
     newY = max 0 (mario.y + dt * vy)
   in
     { mario
@@ -111,6 +113,8 @@ update computer mario =
             mario.dir  -- face direction of last movement when standing still
       , trace = addPointUnlessDuplicate (newX, newY) mario.trace
     }
+
+
 
 addPointUnlessDuplicate point path =
   if (List.head path) == Just point then
