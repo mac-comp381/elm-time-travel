@@ -8,6 +8,7 @@ module Asteroids exposing (game)
 import Playground exposing (..)
 import Random
 import Set
+import TimeTravel exposing (addTimeTravel)
 
 game =
   { initialState = initialState
@@ -28,6 +29,10 @@ asteroidColor = (rgb 160 160 160)
 shipColor = (rgb 255 120 60)
 bulletColor = yellow
 bulletRadius = 2
+
+-- new const where the ship has a safe zone so asteroids can't touch it 
+shipSafeRadius = 150
+safeRadiusColor = rgb 255 0 0 
 
 ------ MODEL ------
 
@@ -81,19 +86,25 @@ bulletShape =
   ]
 
 ------ VIEW ------
-
-view computer model =
-  [rectangle black computer.screen.width computer.screen.height]
-    ++ [model.ship      |> viewGameObject shipColor 1.0]
-    ++ (model.asteroids |> List.map (viewGameObject asteroidColor 0.7))
-    ++ (model.bullets   |> List.map (viewGameObject bulletColor 1.0))
-
 viewGameObject : Color -> Float -> GameObject -> Shape
 viewGameObject color opacity obj =
   polygon color obj.shape
     |> fade opacity
     |> rotate obj.dir
     |> move obj.x obj.y
+    
+view computer model =
+  [ rectangle black computer.screen.width computer.screen.height ]
+    ++ [ viewSafeRadius model.ship ]
+    ++ [model.ship      |> viewGameObject shipColor 1.0 ]
+    ++ (model.asteroids |> List.map (viewGameObject asteroidColor 0.7))
+    ++ (model.bullets   |> List.map (viewGameObject bulletColor 1.0))
+
+viewSafeRadius : GameObject -> Shape
+viewSafeRadius ship =
+  circle safeRadiusColor shipSafeRadius
+    |> fade 0.3  -- opacity control
+    |> move ship.x ship.y
 
 
 ------ UPDATE ------
@@ -103,6 +114,7 @@ update computer model =
     |> shoot computer
     |> handleMotion computer
     |> checkBulletCollisions
+    |> removeAsteroidsNearShip
 
 shoot computer model =
   if spacePressed computer then
@@ -132,6 +144,14 @@ newBullet model  =
       , shape = bulletShape
       }
     ]
+
+removeAsteroidsNearShip model =
+  let
+    isOutsideSafeRadius asteroid =
+      (hypot (model.ship.x - asteroid.x) (model.ship.y - asteroid.y)) > shipSafeRadius
+  in
+    { model | asteroids = List.filter isOutsideSafeRadius model.asteroids }
+
 
 handleMotion computer model =
   { model
