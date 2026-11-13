@@ -47,6 +47,7 @@ type alias Model =
   , justFiredShot : Bool
   , asteroids : List GameObject
   , bullets : List GameObject
+  , count: Int          --to keep track of my records
   }
 
 initialState : Model
@@ -64,6 +65,7 @@ initialState =
   , justFiredShot = False
   , asteroids = []
   , bullets = []
+  , count = 0
   }
 
 shipShape =
@@ -87,6 +89,9 @@ view computer model =
     ++ [model.ship      |> viewGameObject shipColor 1.0]
     ++ (model.asteroids |> List.map (viewGameObject asteroidColor 0.7))
     ++ (model.bullets   |> List.map (viewGameObject bulletColor 1.0))
+    ++ [ words white ("Shots Fired: " ++ String.fromInt model.count)
+        |> move (computer.screen.left + 80) (computer.screen.top - 90)
+       ]
 
 viewGameObject : Color -> Float -> GameObject -> Shape
 viewGameObject color opacity obj =
@@ -112,6 +117,7 @@ shoot computer model =
       { model
         | bullets = model.bullets ++ newBullet model
         , justFiredShot = True
+        , count = model.count + 1  --this will icrement the counter 
       }
   else
     { model | justFiredShot = False }
