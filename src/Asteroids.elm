@@ -6,6 +6,7 @@
 module Asteroids exposing (game)
 
 import Playground exposing (..)
+import Html exposing (..)
 import Random
 import Set
 
@@ -47,6 +48,7 @@ type alias Model =
   , justFiredShot : Bool
   , asteroids : List GameObject
   , bullets : List GameObject
+  , firedTimes: Int
   }
 
 initialState : Model
@@ -64,6 +66,7 @@ initialState =
   , justFiredShot = False
   , asteroids = []
   , bullets = []
+  , firedTimes = 0
   }
 
 shipShape =
@@ -87,6 +90,7 @@ view computer model =
     ++ [model.ship      |> viewGameObject shipColor 1.0]
     ++ (model.asteroids |> List.map (viewGameObject asteroidColor 0.7))
     ++ (model.bullets   |> List.map (viewGameObject bulletColor 1.0))
+    ++ [ words white ("Fired Times: " ++ String.fromInt model.firedTimes)]
 
 viewGameObject : Color -> Float -> GameObject -> Shape
 viewGameObject color opacity obj =
@@ -112,6 +116,7 @@ shoot computer model =
       { model
         | bullets = model.bullets ++ newBullet model
         , justFiredShot = True
+        , firedTimes = model.firedTimes + 1
       }
   else
     { model | justFiredShot = False }

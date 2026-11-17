@@ -32,6 +32,7 @@ initialState =
   , vy = 0
   , dir = Right
   , trace = []
+  , jump = 0
   }
 
 type XDirection = Left | Right
@@ -57,6 +58,10 @@ view computer mario =
     , marioSpriteName mario
         |> image 70 70
         |> move mario.x (b + 76 + mario.y)
+    , rectangle (rgb 242 93 12) 50 50 -- lava
+        |> move 180 (b + 75)
+    , words blue ("Jump Times: " ++ String.fromInt mario.jump)
+        |> move 0 150
     ]
 
 marioSpriteName mario =
@@ -96,7 +101,16 @@ update computer mario =
 
     newX = mario.x + dt * vx
     newY = max 0 (mario.y + dt * vy)
+    newJump =
+      if mario.y == 0 && computer.keyboard.up then
+        mario.jump + 1
+      else
+        mario.jump
+
   in
+    if 155 <= newX && newX <= 205 && newY <= 50 then
+        initialState
+    else
     { mario
       | x = newX
       , y = newY
@@ -110,6 +124,7 @@ update computer mario =
           else
             mario.dir  -- face direction of last movement when standing still
       , trace = addPointUnlessDuplicate (newX, newY) mario.trace
+      , jump = newJump
     }
 
 addPointUnlessDuplicate point path =
